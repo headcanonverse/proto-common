@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package common;
+
+option go_package = "github.com/Kirimatt/proto-common/common;common";
+
+// Контекст авторизации, передаваемый от сервиса авторизации.
+// Используется для проверки доступа, например, для защиты от IDOR.
+message AuthContext {
+  bool valid = 1;
+  string message = 2;
+  string id = 3;       // Идентификатор пользователя (UUID)
+  string email = 4;
+  string role = 5;
+}
+
+// Сообщения для курсорной пагинации.
+message PageRequest {
+  string cursor = 1;
+  int32 limit = 2;
+}
+
+message PageResponse {
+  string next_cursor = 1;
+}
+
