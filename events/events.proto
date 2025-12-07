@@ -59,3 +59,17 @@ message ChapterReleasedEvent {
   string title = 5;
   google.protobuf.Timestamp released_at = 6;
 }
+
+// PreferenceSelection describes a chosen label/type pair.
+message PreferenceSelection {
+  string label_id = 1;
+  string label_type = 2;
+}
+
+// UserPreferencesUpdatedEvent is emitted when a user updates their explicit preferences.
+message UserPreferencesUpdatedEvent {
+  string event_id = 1;
+  string user_id = 2;
+  repeated PreferenceSelection preferences = 3;
+  google.protobuf.Timestamp occurred_at = 4;
+}
