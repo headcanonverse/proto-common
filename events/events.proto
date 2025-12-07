@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package events;
+
+option go_package = "github.com/headcanonverse/proto-common/events;events";
+
+import "google/protobuf/timestamp.proto";
+
+// ToggleStatus описывает двоичные события (добавлен/удален, подписался/отписался и т.д.).
+enum ToggleStatus {
+  TOGGLE_STATUS_UNSPECIFIED = 0;
+  TOGGLE_STATUS_ENABLED = 1;
+  TOGGLE_STATUS_DISABLED = 2;
+}
+
+// ReadingStatus фиксирует состояние чтения книги.
+enum ReadingStatus {
+  READING_STATUS_UNSPECIFIED = 0;
+  READING_STATUS_READING = 1;
+  READING_STATUS_PAUSED = 2;
+  READING_STATUS_FINISHED = 3;
+}
+
+// BookFavoritedEvent публикуется при добавлении/удалении книги из избранного.
+message BookFavoritedEvent {
+  string event_id = 1;
+  string user_id = 2;
+  string book_id = 3;
+  ToggleStatus status = 4;
+  google.protobuf.Timestamp occurred_at = 5;
+}
+
+// AuthorFollowedEvent публикуется при подписке на автора или отписке от него.
+message AuthorFollowedEvent {
+  string event_id = 1;
+  string follower_id = 2;
+  string author_id = 3;
+  ToggleStatus status = 4;
+  google.protobuf.Timestamp occurred_at = 5;
+}
+
+// ReadingProgressUpdatedEvent описывает изменение прогресса чтения.
+message ReadingProgressUpdatedEvent {
+  string event_id = 1;
+  string user_id = 2;
+  string book_id = 3;
+  int32 part = 4;
+  double progress_percent = 5;
+  ReadingStatus status = 6;
+  google.protobuf.Timestamp occurred_at = 7;
+}
+
+// ChapterReleasedEvent публикуется book-service при выходе новой главы/части.
+message ChapterReleasedEvent {
+  string event_id = 1;
+  string book_id = 2;
+  string chapter_id = 3;
+  int32 chapter_number = 4;
+  string title = 5;
+  google.protobuf.Timestamp released_at = 6;
+}
