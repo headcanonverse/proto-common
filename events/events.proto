@@ -62,7 +62,7 @@ message ChapterReleasedEvent {
 
 // PreferenceSelection describes a chosen label/type pair.
 message PreferenceSelection {
-  string label_id = 1;
+  string label_name = 1;
   string label_type = 2;
 }
 
