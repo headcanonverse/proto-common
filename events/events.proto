@@ -28,6 +28,7 @@ message BookFavoritedEvent {
   string book_id = 3;
   ToggleStatus status = 4;
   google.protobuf.Timestamp occurred_at = 5;
+  string source = 6; // канал, из которого пришло событие (ios/web/...).
 }
 
 // AuthorFollowedEvent публикуется при подписке на автора или отписке от него.
@@ -37,6 +38,7 @@ message AuthorFollowedEvent {
   string author_id = 3;
   ToggleStatus status = 4;
   google.protobuf.Timestamp occurred_at = 5;
+  string source = 6;
 }
 
 // ReadingProgressUpdatedEvent описывает изменение прогресса чтения.
@@ -48,6 +50,28 @@ message ReadingProgressUpdatedEvent {
   double progress_percent = 5;
   ReadingStatus status = 6;
   google.protobuf.Timestamp occurred_at = 7;
+  string source = 8;
+}
+
+// BookOpenedEvent фиксирует факт открытия книги пользователем (для "недавних").
+message BookOpenedEvent {
+  string event_id = 1;
+  string user_id = 2;
+  string book_id = 3;
+  int32 part = 4;
+  string source = 5;
+  google.protobuf.Timestamp occurred_at = 6;
+}
+
+// BookFinishedEvent публикуется, когда пользователь завершил книгу.
+message BookFinishedEvent {
+  string event_id = 1;
+  string user_id = 2;
+  string book_id = 3;
+  int32 last_part = 4;          // на какой части завершили (для сериалов).
+  double progress_percent = 5;  // обычно 100, но оставили поле для гибкости.
+  google.protobuf.Timestamp finished_at = 6;
+  string source = 7;
 }
 
 // ChapterReleasedEvent публикуется book-service при выходе новой главы/части.
