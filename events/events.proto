@@ -92,6 +92,7 @@ message BookReleasedEvent {
   string title = 4;
   google.protobuf.Timestamp released_at = 5;
   repeated string labels = 6;
+  string synopsis = 7;
 }
 
 // BookMetaInfoUpdatedEvent публикуется при обновлении мета-информации книги.
