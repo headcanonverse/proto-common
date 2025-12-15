@@ -84,6 +84,15 @@ message ChapterReleasedEvent {
   google.protobuf.Timestamp released_at = 6;
 }
 
+// BookReleasedEvent публикуется book-service при выпуске новой книги.
+message BookReleasedEvent {
+  string event_id = 1;
+  string book_id = 2;
+  string author_id = 3;
+  string title = 4;
+  google.protobuf.Timestamp released_at = 5;
+}
+
 // PreferenceSelection describes a chosen label/type pair.
 message PreferenceSelection {
   string label_name = 1;
