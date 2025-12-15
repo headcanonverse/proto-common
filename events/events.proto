@@ -91,6 +91,15 @@ message BookReleasedEvent {
   string author_id = 3;
   string title = 4;
   google.protobuf.Timestamp released_at = 5;
+  repeated string labels = 6;
+}
+
+// BookLabelsUpdatedEvent публикуется при обновлении мета-информации книги.
+message BookLabelsUpdatedEvent {
+  string event_id = 1;
+  string book_id = 2;
+  repeated string labels = 3;
+  google.protobuf.Timestamp updated_at = 4;
 }
 
 // PreferenceSelection describes a chosen label/type pair.
