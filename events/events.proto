@@ -94,12 +94,20 @@ message BookReleasedEvent {
   repeated string labels = 6;
 }
 
-// BookLabelsUpdatedEvent публикуется при обновлении мета-информации книги.
-message BookLabelsUpdatedEvent {
+// BookMetaInfoUpdatedEvent публикуется при обновлении мета-информации книги.
+message BookMetaInfoUpdatedEvent {
   string event_id = 1;
   string book_id = 2;
-  repeated string labels = 3;
-  google.protobuf.Timestamp updated_at = 4;
+  string meta_info_id = 3;
+  string title = 4;
+  string synopsis = 5;
+  repeated string labels = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+  google.protobuf.Timestamp deleted_at = 9;
+  double average_rating = 10;
+  int32 parts_count = 11;
+  int32 reviews_count = 12;
 }
 
 // PreferenceSelection describes a chosen label/type pair.
