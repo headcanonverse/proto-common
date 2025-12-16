@@ -109,6 +109,7 @@ message BookMetaInfoUpdatedEvent {
   double average_rating = 10;
   int32 parts_count = 11;
   int32 reviews_count = 12;
+  int32 comments_count = 13;
 }
 
 // PreferenceSelection describes a chosen label/type pair.
