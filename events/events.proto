@@ -112,6 +112,61 @@ message BookMetaInfoUpdatedEvent {
   int32 comments_count = 13;
 }
 
+// ReviewCreatedEvent captures creation of a new review on a book.
+message ReviewCreatedEvent {
+  string event_id = 1;
+  string book_id = 2;
+  string review_id = 3;
+  string user_id = 4;
+  int32 rating = 5;
+  google.protobuf.Timestamp occurred_at = 6;
+  map<string, string> metadata = 7;
+}
+
+// ReviewUpdatedEvent captures updates of an existing review.
+message ReviewUpdatedEvent {
+  string event_id = 1;
+  string book_id = 2;
+  string review_id = 3;
+  string user_id = 4;
+  int32 rating = 5;
+  google.protobuf.Timestamp occurred_at = 6;
+  map<string, string> metadata = 7;
+}
+
+// ReviewDeletedEvent captures soft deletion of a review.
+message ReviewDeletedEvent {
+  string event_id = 1;
+  string book_id = 2;
+  string review_id = 3;
+  string user_id = 4;
+  int32 rating = 5;
+  google.protobuf.Timestamp occurred_at = 6;
+  map<string, string> metadata = 7;
+}
+
+// CommentCreatedEvent captures creation of a new comment on a chapter.
+message CommentCreatedEvent {
+  string event_id = 1;
+  string book_id = 2;
+  string comment_id = 3;
+  string user_id = 4;
+  string book_part_id = 5;
+  google.protobuf.Timestamp occurred_at = 6;
+  map<string, string> metadata = 7;
+}
+
+// CommentDeletedEvent captures deletion of an existing comment.
+message CommentDeletedEvent {
+  string event_id = 1;
+  string book_id = 2;
+  string comment_id = 3;
+  string user_id = 4;
+  string book_part_id = 5;
+  google.protobuf.Timestamp occurred_at = 6;
+  map<string, string> metadata = 7;
+}
+
 // PreferenceSelection describes a chosen label/type pair.
 message PreferenceSelection {
   string label_name = 1;
