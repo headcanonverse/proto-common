@@ -180,3 +180,98 @@ message UserPreferencesUpdatedEvent {
   repeated PreferenceSelection preferences = 3;
   google.protobuf.Timestamp occurred_at = 4;
 }
+
+// ============================================================================
+// Recommendation Service Events
+// ============================================================================
+
+// RecommendationType defines the type of recommendation computed.
+enum RecommendationType {
+  RECOMMENDATION_TYPE_UNSPECIFIED = 0;
+  RECOMMENDATION_TYPE_PERSONALIZED = 1;    // Персональные рекомендации (hybrid)
+  RECOMMENDATION_TYPE_CONTENT_BASED = 2;   // На основе контента
+  RECOMMENDATION_TYPE_COLLABORATIVE = 3;   // Collaborative filtering
+  RECOMMENDATION_TYPE_TRENDING = 4;        // Trending/популярные
+  RECOMMENDATION_TYPE_SIMILAR = 5;         // Похожие на книгу
+  RECOMMENDATION_TYPE_COLD_START = 6;      // Для новых пользователей
+}
+
+// RecommendedBook represents a single book recommendation with score and reason.
+message RecommendedBook {
+  string book_id = 1;
+  double score = 2;
+  string reason = 3;                       // "because you liked X", "trending in genre Y"
+}
+
+// RecommendationsComputedEvent is published when recommendations are computed for a user.
+message RecommendationsComputedEvent {
+  string event_id = 1;
+  string user_id = 2;
+  RecommendationType recommendation_type = 3;
+  repeated RecommendedBook books = 4;
+  string algorithm = 5;                    // Algorithm version used
+  google.protobuf.Timestamp computed_at = 6;
+  google.protobuf.Timestamp expires_at = 7;
+}
+
+// TrendingComputedEvent is published when global trending list is updated.
+message TrendingComputedEvent {
+  string event_id = 1;
+  string period = 2;                       // daily/weekly/monthly
+  repeated RecommendedBook books = 3;
+  google.protobuf.Timestamp computed_at = 4;
+}
+
+// SimilarBooksComputedEvent is published when similar books for a book are computed.
+message SimilarBooksComputedEvent {
+  string event_id = 1;
+  string book_id = 2;
+  repeated RecommendedBook similar_books = 3;
+  string algorithm = 4;
+  google.protobuf.Timestamp computed_at = 5;
+}
+
+// ============================================================================
+// Home Feed Service Events
+// ============================================================================
+
+// ShelfType defines the type of shelf on the home feed.
+enum ShelfType {
+  SHELF_TYPE_UNSPECIFIED = 0;
+  SHELF_TYPE_CONTINUE_READING = 1;         // Продолжить чтение
+  SHELF_TYPE_FOR_YOU = 2;                  // Для вас (персональные)
+  SHELF_TYPE_TRENDING = 3;                 // Популярное сейчас
+  SHELF_TYPE_NEW_FROM_AUTHORS = 4;         // Новое от авторов
+  SHELF_TYPE_NEW_CHAPTERS = 5;             // Новые главы
+  SHELF_TYPE_RECENTLY_ADDED = 6;           // Недавно добавленные
+  SHELF_TYPE_BECAUSE_YOU_READ = 7;         // Потому что вы читали X
+  SHELF_TYPE_TOP_RATED = 8;                // Лучшие по оценкам
+}
+
+// ShelfItem represents a single item in a shelf.
+message ShelfItem {
+  string book_id = 1;
+  double score = 2;
+  string reason = 3;
+  map<string, string> metadata = 4;        // Additional display data
+  google.protobuf.Timestamp added_at = 5;
+}
+
+// ShelfUpdatedEvent is published when a user's shelf is updated.
+message ShelfUpdatedEvent {
+  string event_id = 1;
+  string user_id = 2;                      // Empty for global shelves
+  ShelfType shelf_type = 3;
+  repeated ShelfItem items = 4;
+  int32 version = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+// ShelfInvalidatedEvent signals that a shelf needs to be rebuilt.
+message ShelfInvalidatedEvent {
+  string event_id = 1;
+  string user_id = 2;                      // Empty for global shelves
+  ShelfType shelf_type = 3;
+  string reason = 4;
+  google.protobuf.Timestamp occurred_at = 5;
+}
