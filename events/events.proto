@@ -167,10 +167,21 @@ message CommentDeletedEvent {
   map<string, string> metadata = 7;
 }
 
+// LabelType enumerates supported label taxonomies shared across services.
+enum LabelType {
+  LABEL_TYPE_UNSPECIFIED = 0;
+  LABEL_TYPE_GENRE = 1;
+  LABEL_TYPE_AGE_RATING = 2;
+  LABEL_TYPE_STATUS = 3;
+  LABEL_TYPE_LANGUAGE = 4;
+  LABEL_TYPE_FORM = 5;
+  LABEL_TYPE_USER_CREATED = 6;
+}
+
 // PreferenceSelection describes a chosen label/type pair.
 message PreferenceSelection {
   string label_name = 1;
-  string label_type = 2;
+  LabelType label_type = 2;
 }
 
 // UserPreferencesUpdatedEvent is emitted when a user updates their explicit preferences.
