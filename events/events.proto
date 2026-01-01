@@ -91,8 +91,9 @@ message BookReleasedEvent {
   string author_id = 3;
   string title = 4;
   google.protobuf.Timestamp released_at = 5;
-  repeated string labels = 6;
-  string synopsis = 7;
+  repeated LabelInfo labels = 6;
+  repeated LabelInfo hidden_labels = 7;
+  string synopsis = 8;
 }
 
 // BookMetaInfoUpdatedEvent публикуется при обновлении мета-информации книги.
@@ -102,14 +103,15 @@ message BookMetaInfoUpdatedEvent {
   string meta_info_id = 3;
   string title = 4;
   string synopsis = 5;
-  repeated string labels = 6;
-  google.protobuf.Timestamp created_at = 7;
-  google.protobuf.Timestamp updated_at = 8;
-  google.protobuf.Timestamp deleted_at = 9;
-  double average_rating = 10;
-  int32 parts_count = 11;
-  int32 reviews_count = 12;
-  int32 comments_count = 13;
+  repeated LabelInfo labels = 6;
+  repeated LabelInfo hidden_labels = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  google.protobuf.Timestamp deleted_at = 10;
+  double average_rating = 11;
+  int32 parts_count = 12;
+  int32 reviews_count = 13;
+  int32 comments_count = 14;
 }
 
 // ReviewCreatedEvent captures creation of a new review on a book.
@@ -176,6 +178,14 @@ enum LabelType {
   LABEL_TYPE_LANGUAGE = 4;
   LABEL_TYPE_FORM = 5;
   LABEL_TYPE_USER_CREATED = 6;
+}
+
+// LabelInfo represents full label information in events.
+message LabelInfo {
+  string id = 1;
+  int32 type = 2;
+  string name = 3;
+  string description = 4;
 }
 
 // PreferenceSelection describes a chosen label/type pair.
