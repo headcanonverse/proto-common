@@ -60,7 +60,6 @@ message EntityViewedEvent {
   string user_id = 2;
   string kind = 3;       // "book" | "author" | "playlist"
   string external_id = 4;
-  int32 part = 5;        // meaningful for books only
   string source = 6;
   google.protobuf.Timestamp occurred_at = 7;
 }
