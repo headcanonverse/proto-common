@@ -53,14 +53,16 @@ message ReadingProgressUpdatedEvent {
   string source = 8;
 }
 
-// BookOpenedEvent фиксирует факт открытия книги пользователем (для "недавних").
-message BookOpenedEvent {
+// EntityViewedEvent фиксирует факт просмотра сущности (книга, автор, плейлист).
+// Публикуется под event_type: "book.opened", "author.opened", "playlist.opened".
+message EntityViewedEvent {
   string event_id = 1;
   string user_id = 2;
-  string book_id = 3;
-  int32 part = 4;
-  string source = 5;
-  google.protobuf.Timestamp occurred_at = 6;
+  string kind = 3;       // "book" | "author" | "playlist"
+  string external_id = 4;
+  int32 part = 5;        // meaningful for books only
+  string source = 6;
+  google.protobuf.Timestamp occurred_at = 7;
 }
 
 // BookFinishedEvent публикуется, когда пользователь завершил книгу.
