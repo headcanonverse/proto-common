@@ -2298,7 +2298,8 @@ func (x *ShelfInvalidatedEvent) GetOccurredAt() *timestamppb.Timestamp {
 }
 
 // ProfileIndexedEvent is emitted by user-profile-service when a profile
-// is created or updated and needs to be indexed in OpenSearch.
+// is created, updated, or deleted. If deleted_at is set, the profile
+// must be removed from the search index.
 type ProfileIndexedEvent struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	EventId        string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
@@ -2308,6 +2309,7 @@ type ProfileIndexedEvent struct {
 	AvatarThumbUrl string                 `protobuf:"bytes,5,opt,name=avatar_thumb_url,json=avatarThumbUrl,proto3" json:"avatar_thumb_url,omitempty"`
 	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt      *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	DeletedAt      *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -2391,54 +2393,7 @@ func (x *ProfileIndexedEvent) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-// ProfileDeletedEvent is emitted by user-profile-service when a profile
-// is deleted and needs to be removed from the search index.
-type ProfileDeletedEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ProfileDeletedEvent) Reset() {
-	*x = ProfileDeletedEvent{}
-	mi := &file_events_events_proto_msgTypes[24]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ProfileDeletedEvent) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ProfileDeletedEvent) ProtoMessage() {}
-
-func (x *ProfileDeletedEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_events_events_proto_msgTypes[24]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ProfileDeletedEvent.ProtoReflect.Descriptor instead.
-func (*ProfileDeletedEvent) Descriptor() ([]byte, []int) {
-	return file_events_events_proto_rawDescGZIP(), []int{24}
-}
-
-func (x *ProfileDeletedEvent) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
-func (x *ProfileDeletedEvent) GetDeletedAt() *timestamppb.Timestamp {
+func (x *ProfileIndexedEvent) GetDeletedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.DeletedAt
 	}
@@ -2835,7 +2790,7 @@ var file_events_events_proto_rawDesc = string([]byte{
 	0x0a, 0x0b, 0x6f, 0x63, 0x63, 0x75, 0x72, 0x72, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x05, 0x20,
 	0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f,
 	0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x52,
-	0x0a, 0x6f, 0x63, 0x63, 0x75, 0x72, 0x72, 0x65, 0x64, 0x41, 0x74, 0x22, 0x9b, 0x02, 0x0a, 0x13,
+	0x0a, 0x6f, 0x63, 0x63, 0x75, 0x72, 0x72, 0x65, 0x64, 0x41, 0x74, 0x22, 0xd6, 0x02, 0x0a, 0x13,
 	0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x65, 0x64, 0x45, 0x76,
 	0x65, 0x6e, 0x74, 0x12, 0x19, 0x0a, 0x08, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18,
 	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x12, 0x17,
@@ -2853,11 +2808,8 @@ var file_events_events_proto_rawDesc = string([]byte{
 	0x0a, 0x0a, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x07, 0x20, 0x01,
 	0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74,
 	0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x52, 0x09,
-	0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x22, 0x69, 0x0a, 0x13, 0x50, 0x72, 0x6f,
-	0x66, 0x69, 0x6c, 0x65, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x64, 0x45, 0x76, 0x65, 0x6e, 0x74,
-	0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x39, 0x0a, 0x0a, 0x64, 0x65, 0x6c,
-	0x65, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e,
+	0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x39, 0x0a, 0x0a, 0x64, 0x65, 0x6c,
+	0x65, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e,
 	0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e,
 	0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x52, 0x09, 0x64, 0x65, 0x6c, 0x65, 0x74,
 	0x65, 0x64, 0x41, 0x74, 0x2a, 0x64, 0x0a, 0x0c, 0x54, 0x6f, 0x67, 0x67, 0x6c, 0x65, 0x53, 0x74,
@@ -2941,7 +2893,7 @@ func file_events_events_proto_rawDescGZIP() []byte {
 }
 
 var file_events_events_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
-var file_events_events_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
+var file_events_events_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
 var file_events_events_proto_goTypes = []any{
 	(ToggleStatus)(0),                    // 0: events.ToggleStatus
 	(ReadingStatus)(0),                   // 1: events.ReadingStatus
@@ -2972,64 +2924,63 @@ var file_events_events_proto_goTypes = []any{
 	(*ShelfUpdatedEvent)(nil),            // 26: events.ShelfUpdatedEvent
 	(*ShelfInvalidatedEvent)(nil),        // 27: events.ShelfInvalidatedEvent
 	(*ProfileIndexedEvent)(nil),          // 28: events.ProfileIndexedEvent
-	(*ProfileDeletedEvent)(nil),          // 29: events.ProfileDeletedEvent
-	nil,                                  // 30: events.ReviewCreatedEvent.MetadataEntry
-	nil,                                  // 31: events.ReviewUpdatedEvent.MetadataEntry
-	nil,                                  // 32: events.ReviewDeletedEvent.MetadataEntry
-	nil,                                  // 33: events.CommentCreatedEvent.MetadataEntry
-	nil,                                  // 34: events.CommentDeletedEvent.MetadataEntry
-	nil,                                  // 35: events.ShelfItem.MetadataEntry
-	(*timestamppb.Timestamp)(nil),        // 36: google.protobuf.Timestamp
+	nil,                                  // 29: events.ReviewCreatedEvent.MetadataEntry
+	nil,                                  // 30: events.ReviewUpdatedEvent.MetadataEntry
+	nil,                                  // 31: events.ReviewDeletedEvent.MetadataEntry
+	nil,                                  // 32: events.CommentCreatedEvent.MetadataEntry
+	nil,                                  // 33: events.CommentDeletedEvent.MetadataEntry
+	nil,                                  // 34: events.ShelfItem.MetadataEntry
+	(*timestamppb.Timestamp)(nil),        // 35: google.protobuf.Timestamp
 }
 var file_events_events_proto_depIdxs = []int32{
 	0,  // 0: events.BookFavoritedEvent.status:type_name -> events.ToggleStatus
-	36, // 1: events.BookFavoritedEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	35, // 1: events.BookFavoritedEvent.occurred_at:type_name -> google.protobuf.Timestamp
 	0,  // 2: events.AuthorFollowedEvent.status:type_name -> events.ToggleStatus
-	36, // 3: events.AuthorFollowedEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	35, // 3: events.AuthorFollowedEvent.occurred_at:type_name -> google.protobuf.Timestamp
 	1,  // 4: events.ReadingProgressUpdatedEvent.status:type_name -> events.ReadingStatus
-	36, // 5: events.ReadingProgressUpdatedEvent.occurred_at:type_name -> google.protobuf.Timestamp
-	36, // 6: events.EntityViewedEvent.occurred_at:type_name -> google.protobuf.Timestamp
-	36, // 7: events.BookFinishedEvent.finished_at:type_name -> google.protobuf.Timestamp
-	36, // 8: events.ChapterReleasedEvent.released_at:type_name -> google.protobuf.Timestamp
-	36, // 9: events.BookReleasedEvent.released_at:type_name -> google.protobuf.Timestamp
+	35, // 5: events.ReadingProgressUpdatedEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	35, // 6: events.EntityViewedEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	35, // 7: events.BookFinishedEvent.finished_at:type_name -> google.protobuf.Timestamp
+	35, // 8: events.ChapterReleasedEvent.released_at:type_name -> google.protobuf.Timestamp
+	35, // 9: events.BookReleasedEvent.released_at:type_name -> google.protobuf.Timestamp
 	18, // 10: events.BookReleasedEvent.labels:type_name -> events.LabelInfo
 	18, // 11: events.BookReleasedEvent.hidden_labels:type_name -> events.LabelInfo
 	18, // 12: events.BookMetaInfoUpdatedEvent.labels:type_name -> events.LabelInfo
 	18, // 13: events.BookMetaInfoUpdatedEvent.hidden_labels:type_name -> events.LabelInfo
-	36, // 14: events.BookMetaInfoUpdatedEvent.created_at:type_name -> google.protobuf.Timestamp
-	36, // 15: events.BookMetaInfoUpdatedEvent.updated_at:type_name -> google.protobuf.Timestamp
-	36, // 16: events.BookMetaInfoUpdatedEvent.deleted_at:type_name -> google.protobuf.Timestamp
-	36, // 17: events.ReviewCreatedEvent.occurred_at:type_name -> google.protobuf.Timestamp
-	30, // 18: events.ReviewCreatedEvent.metadata:type_name -> events.ReviewCreatedEvent.MetadataEntry
-	36, // 19: events.ReviewUpdatedEvent.occurred_at:type_name -> google.protobuf.Timestamp
-	31, // 20: events.ReviewUpdatedEvent.metadata:type_name -> events.ReviewUpdatedEvent.MetadataEntry
-	36, // 21: events.ReviewDeletedEvent.occurred_at:type_name -> google.protobuf.Timestamp
-	32, // 22: events.ReviewDeletedEvent.metadata:type_name -> events.ReviewDeletedEvent.MetadataEntry
-	36, // 23: events.CommentCreatedEvent.occurred_at:type_name -> google.protobuf.Timestamp
-	33, // 24: events.CommentCreatedEvent.metadata:type_name -> events.CommentCreatedEvent.MetadataEntry
-	36, // 25: events.CommentDeletedEvent.occurred_at:type_name -> google.protobuf.Timestamp
-	34, // 26: events.CommentDeletedEvent.metadata:type_name -> events.CommentDeletedEvent.MetadataEntry
+	35, // 14: events.BookMetaInfoUpdatedEvent.created_at:type_name -> google.protobuf.Timestamp
+	35, // 15: events.BookMetaInfoUpdatedEvent.updated_at:type_name -> google.protobuf.Timestamp
+	35, // 16: events.BookMetaInfoUpdatedEvent.deleted_at:type_name -> google.protobuf.Timestamp
+	35, // 17: events.ReviewCreatedEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	29, // 18: events.ReviewCreatedEvent.metadata:type_name -> events.ReviewCreatedEvent.MetadataEntry
+	35, // 19: events.ReviewUpdatedEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	30, // 20: events.ReviewUpdatedEvent.metadata:type_name -> events.ReviewUpdatedEvent.MetadataEntry
+	35, // 21: events.ReviewDeletedEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	31, // 22: events.ReviewDeletedEvent.metadata:type_name -> events.ReviewDeletedEvent.MetadataEntry
+	35, // 23: events.CommentCreatedEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	32, // 24: events.CommentCreatedEvent.metadata:type_name -> events.CommentCreatedEvent.MetadataEntry
+	35, // 25: events.CommentDeletedEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	33, // 26: events.CommentDeletedEvent.metadata:type_name -> events.CommentDeletedEvent.MetadataEntry
 	2,  // 27: events.PreferenceSelection.label_type:type_name -> events.LabelType
 	19, // 28: events.UserPreferencesUpdatedEvent.preferences:type_name -> events.PreferenceSelection
-	36, // 29: events.UserPreferencesUpdatedEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	35, // 29: events.UserPreferencesUpdatedEvent.occurred_at:type_name -> google.protobuf.Timestamp
 	3,  // 30: events.RecommendationsComputedEvent.recommendation_type:type_name -> events.RecommendationType
 	21, // 31: events.RecommendationsComputedEvent.books:type_name -> events.RecommendedBook
-	36, // 32: events.RecommendationsComputedEvent.computed_at:type_name -> google.protobuf.Timestamp
-	36, // 33: events.RecommendationsComputedEvent.expires_at:type_name -> google.protobuf.Timestamp
+	35, // 32: events.RecommendationsComputedEvent.computed_at:type_name -> google.protobuf.Timestamp
+	35, // 33: events.RecommendationsComputedEvent.expires_at:type_name -> google.protobuf.Timestamp
 	21, // 34: events.TrendingComputedEvent.books:type_name -> events.RecommendedBook
-	36, // 35: events.TrendingComputedEvent.computed_at:type_name -> google.protobuf.Timestamp
+	35, // 35: events.TrendingComputedEvent.computed_at:type_name -> google.protobuf.Timestamp
 	21, // 36: events.SimilarBooksComputedEvent.similar_books:type_name -> events.RecommendedBook
-	36, // 37: events.SimilarBooksComputedEvent.computed_at:type_name -> google.protobuf.Timestamp
-	35, // 38: events.ShelfItem.metadata:type_name -> events.ShelfItem.MetadataEntry
-	36, // 39: events.ShelfItem.added_at:type_name -> google.protobuf.Timestamp
+	35, // 37: events.SimilarBooksComputedEvent.computed_at:type_name -> google.protobuf.Timestamp
+	34, // 38: events.ShelfItem.metadata:type_name -> events.ShelfItem.MetadataEntry
+	35, // 39: events.ShelfItem.added_at:type_name -> google.protobuf.Timestamp
 	4,  // 40: events.ShelfUpdatedEvent.shelf_type:type_name -> events.ShelfType
 	25, // 41: events.ShelfUpdatedEvent.items:type_name -> events.ShelfItem
-	36, // 42: events.ShelfUpdatedEvent.updated_at:type_name -> google.protobuf.Timestamp
+	35, // 42: events.ShelfUpdatedEvent.updated_at:type_name -> google.protobuf.Timestamp
 	4,  // 43: events.ShelfInvalidatedEvent.shelf_type:type_name -> events.ShelfType
-	36, // 44: events.ShelfInvalidatedEvent.occurred_at:type_name -> google.protobuf.Timestamp
-	36, // 45: events.ProfileIndexedEvent.created_at:type_name -> google.protobuf.Timestamp
-	36, // 46: events.ProfileIndexedEvent.updated_at:type_name -> google.protobuf.Timestamp
-	36, // 47: events.ProfileDeletedEvent.deleted_at:type_name -> google.protobuf.Timestamp
+	35, // 44: events.ShelfInvalidatedEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	35, // 45: events.ProfileIndexedEvent.created_at:type_name -> google.protobuf.Timestamp
+	35, // 46: events.ProfileIndexedEvent.updated_at:type_name -> google.protobuf.Timestamp
+	35, // 47: events.ProfileIndexedEvent.deleted_at:type_name -> google.protobuf.Timestamp
 	48, // [48:48] is the sub-list for method output_type
 	48, // [48:48] is the sub-list for method input_type
 	48, // [48:48] is the sub-list for extension type_name
@@ -3048,7 +2999,7 @@ func file_events_events_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_events_events_proto_rawDesc), len(file_events_events_proto_rawDesc)),
 			NumEnums:      5,
-			NumMessages:   31,
+			NumMessages:   30,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

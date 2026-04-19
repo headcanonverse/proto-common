@@ -303,7 +303,8 @@ message ShelfInvalidatedEvent {
 // ============================================================================
 
 // ProfileIndexedEvent is emitted by user-profile-service when a profile
-// is created or updated and needs to be indexed in OpenSearch.
+// is created, updated, or deleted. If deleted_at is set, the profile
+// must be removed from the search index.
 message ProfileIndexedEvent {
   string event_id = 1;
   string user_id = 2;
@@ -312,11 +313,5 @@ message ProfileIndexedEvent {
   string avatar_thumb_url = 5;
   google.protobuf.Timestamp created_at = 6;
   google.protobuf.Timestamp updated_at = 7;
-}
-
-// ProfileDeletedEvent is emitted by user-profile-service when a profile
-// is deleted and needs to be removed from the search index.
-message ProfileDeletedEvent {
-  string user_id = 1;
-  google.protobuf.Timestamp deleted_at = 2;
+  google.protobuf.Timestamp deleted_at = 8;
 }
