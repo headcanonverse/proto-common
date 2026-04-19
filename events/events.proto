@@ -313,3 +313,10 @@ message ProfileIndexedEvent {
   google.protobuf.Timestamp created_at = 6;
   google.protobuf.Timestamp updated_at = 7;
 }
+
+// ProfileDeletedEvent is emitted by user-profile-service when a profile
+// is deleted and needs to be removed from the search index.
+message ProfileDeletedEvent {
+  string user_id = 1;
+  google.protobuf.Timestamp deleted_at = 2;
+}
