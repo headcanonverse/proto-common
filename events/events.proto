@@ -6,6 +6,17 @@ option go_package = "github.com/headcanonverse/proto-common/events;events";
 
 import "google/protobuf/timestamp.proto";
 
+// Source идентифицирует клиентскую платформу, с которой пришло событие.
+enum Source {
+  SOURCE_UNSPECIFIED = 0;
+  SOURCE_WEB = 1;
+  SOURCE_ANDROID = 2;
+  SOURCE_IOS = 3;
+  SOURCE_DESKTOP_WIN = 4;
+  SOURCE_DESKTOP_MAC = 5;
+  SOURCE_DESKTOP_LINUX = 6;
+}
+
 // ToggleStatus описывает двоичные события (добавлен/удален, подписался/отписался и т.д.).
 enum ToggleStatus {
   TOGGLE_STATUS_UNSPECIFIED = 0;
@@ -28,7 +39,7 @@ message BookFavoritedEvent {
   string book_id = 3;
   ToggleStatus status = 4;
   google.protobuf.Timestamp occurred_at = 5;
-  string source = 6; // канал, из которого пришло событие (ios/web/...).
+  Source source = 6;
 }
 
 // AuthorFollowedEvent публикуется при подписке на автора или отписке от него.
@@ -38,7 +49,7 @@ message AuthorFollowedEvent {
   string author_id = 3;
   ToggleStatus status = 4;
   google.protobuf.Timestamp occurred_at = 5;
-  string source = 6;
+  Source source = 6;
 }
 
 // ReadingProgressUpdatedEvent описывает изменение прогресса чтения.
@@ -50,7 +61,7 @@ message ReadingProgressUpdatedEvent {
   double progress_percent = 5;
   ReadingStatus status = 6;
   google.protobuf.Timestamp occurred_at = 7;
-  string source = 8;
+  Source source = 8;
 }
 
 // EntityViewedEvent фиксирует факт просмотра сущности (книга, автор, плейлист).
@@ -60,7 +71,7 @@ message EntityViewedEvent {
   string user_id = 2;
   string kind = 3;       // "book" | "author" | "playlist"
   string external_id = 4;
-  string source = 6;
+  Source source = 6;
   google.protobuf.Timestamp occurred_at = 7;
 }
 
@@ -72,7 +83,7 @@ message BookFinishedEvent {
   int32 last_part = 4;          // на какой части завершили (для сериалов).
   double progress_percent = 5;  // обычно 100, но оставили поле для гибкости.
   google.protobuf.Timestamp finished_at = 6;
-  string source = 7;
+  Source source = 7;
 }
 
 // ChapterReleasedEvent публикуется book-service при выходе новой главы/части.
