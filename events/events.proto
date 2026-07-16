@@ -326,3 +326,72 @@ message ProfileIndexedEvent {
   google.protobuf.Timestamp updated_at = 7;
   google.protobuf.Timestamp deleted_at = 8;
 }
+
+// ============================================================================
+// Catalog Service Events (discovery: works/editions, user-library, import)
+// ============================================================================
+
+// WorkSource определяет происхождение work в каталоге.
+enum WorkSource {
+  WORK_SOURCE_UNSPECIFIED = 0;
+  WORK_SOURCE_OPENLIBRARY = 1;
+  WORK_SOURCE_SAMIZDAT = 2;
+  WORK_SOURCE_EXTERNAL = 3;
+}
+
+// UserWorkStatus — статус книги в библиотеке пользователя (user_works).
+enum UserWorkStatus {
+  USER_WORK_STATUS_UNSPECIFIED = 0;
+  USER_WORK_STATUS_WANT_TO_READ = 1;
+  USER_WORK_STATUS_READING = 2;
+  USER_WORK_STATUS_READ = 3;
+  USER_WORK_STATUS_DNF = 4;
+}
+
+// WorkUpsertedEvent публикуется catalog-service при создании/обновлении work.
+// Консюмеры: recommendation-service (feature store), search-service (индекс works).
+// ВАЖНО: книжные события выше (BookReleased, ChapterReleased, BookFavorited,
+// BookOpened, BookFinished, ReadingProgressUpdated, review/comment events)
+// переводятся с book_id на work_id в фазе 2 реворка (см.
+// plan-book-discovery-implementation.md, единое ID-пространство work_id).
+message WorkUpsertedEvent {
+  string event_id = 1;
+  string work_id = 2;
+  WorkSource source = 3;
+  string title = 4;
+  repeated string authors = 5;
+  repeated string labels = 6;          // таксономия LabelType (самиздат) + subjects OL
+  bool is_adult = 7;
+  bool has_content = 8;                // есть главы в book-service
+  bool published = 9;
+  float average_rating = 10;
+  google.protobuf.Timestamp occurred_at = 11;
+  map<string, string> metadata = 12;
+}
+
+// LibraryImportCompletedEvent публикуется по завершении импорта CSV
+// (Goodreads/StoryGraph) библиотеки пользователя.
+message LibraryImportCompletedEvent {
+  string event_id = 1;
+  string user_id = 2;
+  string import_id = 3;
+  int32 total = 4;
+  int32 matched_auto = 5;
+  int32 matched_low_confidence = 6;
+  int32 unresolved = 7;
+  google.protobuf.Timestamp occurred_at = 8;
+  map<string, string> metadata = 9;
+}
+
+// UserWorkStatusChangedEvent публикуется при изменении статуса/оценки книги
+// в библиотеке пользователя (user_works). Консюмер: recommendation-service.
+message UserWorkStatusChangedEvent {
+  string event_id = 1;
+  string user_id = 2;
+  string work_id = 3;
+  UserWorkStatus status = 4;
+  int32 rating = 5;                    // 1–5, 0 = не выставлена
+  string dnf_reason = 6;               // опционально при status=DNF
+  google.protobuf.Timestamp occurred_at = 7;
+  map<string, string> metadata = 8;
+}
