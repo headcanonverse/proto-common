@@ -36,7 +36,7 @@ enum ReadingStatus {
 message BookFavoritedEvent {
   string event_id = 1;
   string user_id = 2;
-  string book_id = 3;
+  string work_id = 3;
   ToggleStatus status = 4;
   google.protobuf.Timestamp occurred_at = 5;
   Source source = 6;
@@ -56,7 +56,7 @@ message AuthorFollowedEvent {
 message ReadingProgressUpdatedEvent {
   string event_id = 1;
   string user_id = 2;
-  string book_id = 3;
+  string work_id = 3;
   int32 part = 4;
   double progress_percent = 5;
   ReadingStatus status = 6;
@@ -79,7 +79,7 @@ message EntityViewedEvent {
 message BookFinishedEvent {
   string event_id = 1;
   string user_id = 2;
-  string book_id = 3;
+  string work_id = 3;
   int32 last_part = 4;          // на какой части завершили (для сериалов).
   double progress_percent = 5;  // обычно 100, но оставили поле для гибкости.
   google.protobuf.Timestamp finished_at = 6;
@@ -89,7 +89,7 @@ message BookFinishedEvent {
 // ChapterReleasedEvent публикуется book-service при выходе новой главы/части.
 message ChapterReleasedEvent {
   string event_id = 1;
-  string book_id = 2;
+  string work_id = 2;
   string chapter_id = 3;
   int32 chapter_number = 4;
   string title = 5;
@@ -99,7 +99,7 @@ message ChapterReleasedEvent {
 // BookReleasedEvent публикуется book-service при выпуске новой книги.
 message BookReleasedEvent {
   string event_id = 1;
-  string book_id = 2;
+  string work_id = 2;
   string author_id = 3;
   string title = 4;
   google.protobuf.Timestamp released_at = 5;
@@ -111,7 +111,7 @@ message BookReleasedEvent {
 // BookMetaInfoUpdatedEvent публикуется при обновлении мета-информации книги.
 message BookMetaInfoUpdatedEvent {
   string event_id = 1;
-  string book_id = 2;
+  string work_id = 2;
   string meta_info_id = 3;
   string title = 4;
   string synopsis = 5;
@@ -129,7 +129,7 @@ message BookMetaInfoUpdatedEvent {
 // ReviewCreatedEvent captures creation of a new review on a book.
 message ReviewCreatedEvent {
   string event_id = 1;
-  string book_id = 2;
+  string work_id = 2;
   string review_id = 3;
   string user_id = 4;
   int32 rating = 5;
@@ -140,7 +140,7 @@ message ReviewCreatedEvent {
 // ReviewUpdatedEvent captures updates of an existing review.
 message ReviewUpdatedEvent {
   string event_id = 1;
-  string book_id = 2;
+  string work_id = 2;
   string review_id = 3;
   string user_id = 4;
   int32 rating = 5;
@@ -151,7 +151,7 @@ message ReviewUpdatedEvent {
 // ReviewDeletedEvent captures soft deletion of a review.
 message ReviewDeletedEvent {
   string event_id = 1;
-  string book_id = 2;
+  string work_id = 2;
   string review_id = 3;
   string user_id = 4;
   int32 rating = 5;
@@ -162,7 +162,7 @@ message ReviewDeletedEvent {
 // CommentCreatedEvent captures creation of a new comment on a chapter.
 message CommentCreatedEvent {
   string event_id = 1;
-  string book_id = 2;
+  string work_id = 2;
   string comment_id = 3;
   string user_id = 4;
   string book_part_id = 5;
@@ -173,7 +173,7 @@ message CommentCreatedEvent {
 // CommentDeletedEvent captures deletion of an existing comment.
 message CommentDeletedEvent {
   string event_id = 1;
-  string book_id = 2;
+  string work_id = 2;
   string comment_id = 3;
   string user_id = 4;
   string book_part_id = 5;
@@ -229,9 +229,9 @@ enum RecommendationType {
   RECOMMENDATION_TYPE_COLD_START = 6;      // Для новых пользователей
 }
 
-// RecommendedBook represents a single book recommendation with score and reason.
-message RecommendedBook {
-  string book_id = 1;
+// RecommendedWork represents a single book recommendation with score and reason.
+message RecommendedWork {
+  string work_id = 1;
   double score = 2;
   string reason = 3;                       // "because you liked X", "trending in genre Y"
 }
@@ -241,7 +241,7 @@ message RecommendationsComputedEvent {
   string event_id = 1;
   string user_id = 2;
   RecommendationType recommendation_type = 3;
-  repeated RecommendedBook books = 4;
+  repeated RecommendedWork works = 4;
   string algorithm = 5;                    // Algorithm version used
   google.protobuf.Timestamp computed_at = 6;
   google.protobuf.Timestamp expires_at = 7;
@@ -251,15 +251,15 @@ message RecommendationsComputedEvent {
 message TrendingComputedEvent {
   string event_id = 1;
   string period = 2;                       // daily/weekly/monthly
-  repeated RecommendedBook books = 3;
+  repeated RecommendedWork works = 3;
   google.protobuf.Timestamp computed_at = 4;
 }
 
 // SimilarBooksComputedEvent is published when similar books for a book are computed.
 message SimilarBooksComputedEvent {
   string event_id = 1;
-  string book_id = 2;
-  repeated RecommendedBook similar_books = 3;
+  string work_id = 2;
+  repeated RecommendedWork similar_works = 3;
   string algorithm = 4;
   google.protobuf.Timestamp computed_at = 5;
 }
@@ -283,7 +283,7 @@ enum ShelfType {
 
 // ShelfItem represents a single item in a shelf.
 message ShelfItem {
-  string book_id = 1;
+  string work_id = 1;
   double score = 2;
   string reason = 3;
   map<string, string> metadata = 4;        // Additional display data
@@ -350,10 +350,9 @@ enum UserWorkStatus {
 
 // WorkUpsertedEvent публикуется catalog-service при создании/обновлении work.
 // Консюмеры: recommendation-service (feature store), search-service (индекс works).
-// ВАЖНО: книжные события выше (BookReleased, ChapterReleased, BookFavorited,
-// BookOpened, BookFinished, ReadingProgressUpdated, review/comment events)
-// переводятся с book_id на work_id в фазе 2 реворка (см.
-// plan-book-discovery-implementation.md, единое ID-пространство work_id).
+// Книжные события переведены на work_id (2026-07-17, фаза 2 реворка,
+// единое ID-пространство — см. plan-book-discovery-implementation.md).
+// book_part_id в comment-событиях остаётся: глава — сущность контент-домена.
 message WorkUpsertedEvent {
   string event_id = 1;
   string work_id = 2;
