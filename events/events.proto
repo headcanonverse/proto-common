@@ -399,6 +399,20 @@ message LibraryImportCompletedEvent {
   map<string, string> metadata = 9;
 }
 
+// WorkEnrichedEvent публикуется catalog-service при импорте результатов
+// enrichment (cmd/enrich import): каталог оставляет себе витринные поля
+// (vibe_tags, review_summary, enrich_model_version), а эмбеддинг НЕ хранит —
+// он уезжает этим событием в recommendation-service (владелец похожести и
+// всех векторных расчётов; решение пользователя 2026-07-18).
+// Отдельный топик catalog.works.enriched: payload ~4КБ.
+message WorkEnrichedEvent {
+  string event_id = 1;
+  string work_id = 2;
+  repeated float embedding = 3;      // нормализованный, размерность 1024
+  string model_version = 4;          // "{embed_model}@{llm_model}"
+  google.protobuf.Timestamp occurred_at = 5;
+}
+
 // UserWorkStatusChangedEvent публикуется при изменении статуса/оценки книги
 // в библиотеке пользователя (user_works). Консюмер: recommendation-service.
 message UserWorkStatusChangedEvent {
