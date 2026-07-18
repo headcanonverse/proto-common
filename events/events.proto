@@ -94,6 +94,23 @@ message ChapterReleasedEvent {
   int32 chapter_number = 4;
   string title = 5;
   google.protobuf.Timestamp released_at = 6;
+  // Абсолютное число глав work'а ПОСЛЕ события. Консюмеры (catalog-service)
+  // выставляют parts_count/has_content присваиванием, а не инкрементом —
+  // самоисцеление от пропущенных событий. 0 допустим; отсутствие поля в
+  // старых событиях консюмер трактует как «нет данных» (-1).
+  int32 parts_count = 7;
+}
+
+// ChapterDeletedEvent публикуется book-service при удалении главы.
+// Едет в том же топике, что и ChapterReleasedEvent — тип различается
+// kafka-header'ом `event_type` (из outbox.EventType).
+message ChapterDeletedEvent {
+  string event_id = 1;
+  string work_id = 2;
+  string chapter_id = 3;
+  // Абсолютное число оставшихся глав ПОСЛЕ удаления (см. parts_count выше).
+  int32 parts_count = 4;
+  google.protobuf.Timestamp occurred_at = 5;
 }
 
 // BookReleasedEvent публикуется book-service при выпуске новой книги.
