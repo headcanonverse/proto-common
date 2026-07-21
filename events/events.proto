@@ -390,6 +390,17 @@ message WorkUpsertedEvent {
   string enrich_source_hash = 13;
 }
 
+// WorkPurgedEvent публикуется catalog-service только после окончательного
+// удаления work по истечении 30-дневного окна восстановления. Soft-delete
+// продолжает использовать WorkUpsertedEvent{published=false}; это отдельное
+// событие запускает идемпотентную физическую зачистку контентного домена.
+message WorkPurgedEvent {
+  string event_id = 1;
+  string work_id = 2;
+  google.protobuf.Timestamp occurred_at = 3;
+  map<string, string> metadata = 4;
+}
+
 // LibraryImportCompletedEvent публикуется по завершении импорта CSV
 // (Goodreads/StoryGraph) библиотеки пользователя.
 message LibraryImportCompletedEvent {
