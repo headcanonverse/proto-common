@@ -262,6 +262,10 @@ message RecommendationsComputedEvent {
   string algorithm = 5;                    // Algorithm version used
   google.protobuf.Timestamp computed_at = 6;
   google.protobuf.Timestamp expires_at = 7;
+  // Stable logical identity of the computed shelf. Examples:
+  // daily_mix:1, because_you_read:{work_id}, editorial:{slug},
+  // discovery_for_you. Consumers must never infer this from `algorithm`.
+  string shelf_key = 8;
 }
 
 // TrendingComputedEvent is published when global trending list is updated.
