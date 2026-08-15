@@ -432,3 +432,77 @@ message UserWorkStatusChangedEvent {
   google.protobuf.Timestamp occurred_at = 7;
   map<string, string> metadata = 8;
 }
+
+// ============================================================================
+// Recommendation -> Search Discovery Projection Events
+// ============================================================================
+
+// WorkDiscoveryTier is the authoritative eligibility tier derived by
+// recommendation-service. The wire enum keeps UNSPECIFIED as an invalid
+// sentinel; consumers map COLD/DISCOVERY/READABLE to domain tiers 0/1/2.
+enum WorkDiscoveryTier {
+  WORK_DISCOVERY_TIER_UNSPECIFIED = 0;
+  WORK_DISCOVERY_TIER_COLD = 1;
+  WORK_DISCOVERY_TIER_DISCOVERY = 2;
+  WORK_DISCOVERY_TIER_READABLE = 3;
+}
+
+// WorkDiscoverySelectionStatus is an axis separate from tier. Readable works
+// that do not participate in external selection use NOT_APPLICABLE.
+enum WorkDiscoverySelectionStatus {
+  WORK_DISCOVERY_SELECTION_STATUS_UNSPECIFIED = 0;
+  WORK_DISCOVERY_SELECTION_STATUS_NOT_APPLICABLE = 1;
+  WORK_DISCOVERY_SELECTION_STATUS_ACTIVE = 2;
+  WORK_DISCOVERY_SELECTION_STATUS_GRACE = 3;
+  WORK_DISCOVERY_SELECTION_STATUS_INACTIVE = 4;
+  WORK_DISCOVERY_SELECTION_STATUS_BLOCKED = 5;
+}
+
+// WorkDiscoveryReason is a controlled explanation of the current derived
+// state. Generated vibe tags and free-form metadata are intentionally absent.
+enum WorkDiscoveryReason {
+  WORK_DISCOVERY_REASON_UNSPECIFIED = 0;
+  WORK_DISCOVERY_REASON_OL_TRENDING = 1;
+  WORK_DISCOVERY_REASON_COMMERCE_HISTORY = 2;
+  WORK_DISCOVERY_REASON_RECENT_RELEASE_ACTIVITY = 3;
+  WORK_DISCOVERY_REASON_READING_LOG_RECENT = 4;
+  WORK_DISCOVERY_REASON_ALL_TIME_ACTIVE_CLASSIC = 5;
+  WORK_DISCOVERY_REASON_LANGUAGE_GENRE_QUOTA = 6;
+  WORK_DISCOVERY_REASON_READABLE_CONTENT = 7;
+  WORK_DISCOVERY_REASON_MANUAL_EDITORIAL = 8;
+  WORK_DISCOVERY_REASON_GRACE_RETENTION = 9;
+  WORK_DISCOVERY_REASON_OPERATOR_BLOCK = 10;
+}
+
+// WorkDiscoveryRankBucket is a policy-versioned ranking projection. Bucket
+// boundaries belong to policy_version and are not part of this wire contract.
+enum WorkDiscoveryRankBucket {
+  WORK_DISCOVERY_RANK_BUCKET_UNSPECIFIED = 0;
+  WORK_DISCOVERY_RANK_BUCKET_NOT_APPLICABLE = 1;
+  WORK_DISCOVERY_RANK_BUCKET_TOP = 2;
+  WORK_DISCOVERY_RANK_BUCKET_HIGH = 3;
+  WORK_DISCOVERY_RANK_BUCKET_MEDIUM = 4;
+  WORK_DISCOVERY_RANK_BUCKET_BASE = 5;
+}
+
+// WorkDiscoveryUpdatedEvent is emitted by recommendation-service through its
+// transactional outbox. For removed=false, consumers atomically replace the
+// complete tier + selection_status projection and related fields.
+//
+// state_version is monotonically increasing per work_id. Consumers apply only
+// a version greater than the stored one, treat an equal version as idempotent,
+// and ignore lower stale versions. removed=true is an ordered tombstone: it
+// removes the discovery projection and the remaining state fields are ignored.
+message WorkDiscoveryUpdatedEvent {
+  string event_id = 1;
+  string work_id = 2;
+  WorkDiscoveryTier tier = 3;
+  WorkDiscoverySelectionStatus selection_status = 4;
+  repeated WorkDiscoveryReason reasons = 5;
+  bool discovery_eligible = 6;
+  WorkDiscoveryRankBucket rank_bucket = 7;
+  string policy_version = 8;
+  uint64 state_version = 9;
+  google.protobuf.Timestamp occurred_at = 10;
+  bool removed = 11;
+}
