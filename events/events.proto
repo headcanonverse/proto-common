@@ -452,6 +452,39 @@ message WorkPublicationChangedEvent {
   uint64 metadata_version = 10;
 }
 
+// PlaylistSearchProjectionOperation defines the complete online search
+// projection mutation emitted by catalog-service. There are no partial updates.
+enum PlaylistSearchProjectionOperation {
+  PLAYLIST_SEARCH_PROJECTION_OPERATION_UNSPECIFIED = 0;
+  PLAYLIST_SEARCH_PROJECTION_OPERATION_UPSERT = 1;
+  PLAYLIST_SEARCH_PROJECTION_OPERATION_DELETE = 2;
+}
+
+// PlaylistSearchProjectionV1Event is the catalog-owned full snapshot consumed
+// only by search-service. Kafka messages are keyed by playlist_id.
+//
+// projection_version is positive and monotonically increasing per playlist.
+// Equal versions are idempotent only for an identical snapshot; lower versions
+// are stale. DELETE is an ordered tombstone. A private playlist uses DELETE
+// with is_public=false/deleted=false; a deleted playlist additionally sets
+// deleted=true. UPSERT requires is_public=true/deleted=false.
+message PlaylistSearchProjectionV1Event {
+  string event_id = 1;
+  string playlist_id = 2;
+  PlaylistSearchProjectionOperation operation = 3;
+  string owner_user_id = 4;
+  string title = 5;
+  string description = 6;
+  string cover_url = 7;
+  int32 work_count = 8;
+  repeated string author_user_ids = 9;
+  bool is_public = 10;
+  bool deleted = 11;
+  google.protobuf.Timestamp created_at = 12;
+  google.protobuf.Timestamp source_updated_at = 13;
+  uint64 projection_version = 14;
+}
+
 // LibraryImportCompletedEvent публикуется по завершении импорта CSV
 // (Goodreads/StoryGraph) библиотеки пользователя.
 message LibraryImportCompletedEvent {

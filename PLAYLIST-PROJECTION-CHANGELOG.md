@@ -28,7 +28,17 @@
 ## Checkpoints
 
 - [x] Record scope and invariants before changing protobuf code.
-- [ ] Add and generate the versioned protobuf event.
-- [ ] Validate generated code and repository build/tests.
-- [ ] Commit locally without tagging or pushing.
+- [x] Add and generate the versioned protobuf event.
+- [x] Validate generated code and repository build/tests.
+- [x] Commit locally without tagging or pushing.
 
+## Validation
+
+- `PATH="$HOME/go/bin:$PATH" make gen`
+- `go test ./...`
+- `go build -o /tmp/proto-common-events.a ./events`
+- `git diff --check`
+
+Coordinator handoff: publish the contract as the next `proto-common` tag, then
+bump `search-service` and `catalog-service` to that tag without a local module
+replacement.
