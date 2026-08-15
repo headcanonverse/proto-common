@@ -428,6 +428,30 @@ message WorkPurgedEvent {
   uint64 metadata_version = 5;
 }
 
+// WorkPublicationChangedEvent is the catalog-owned publication projection
+// consumed by home-feed-service. It is deliberately separate from
+// WorkUpsertedEvent: catalog metadata replay is allowed to republish every
+// WorkUpsertedEvent and must never manufacture "new release" side effects.
+//
+// Catalog emits this complete snapshot for author-owned works whenever the
+// emitted release facts change. first_published_at is stable across
+// soft-delete/restore; published=false removes the work from release shelves.
+// metadata_version belongs to the same per-work sequence as WorkUpsertedEvent
+// and WorkPurgedEvent. Consumers apply only a greater version, treat an equal
+// payload as idempotent, and ignore a lower stale version.
+message WorkPublicationChangedEvent {
+  string event_id = 1;
+  string work_id = 2;
+  bool published = 3;
+  google.protobuf.Timestamp first_published_at = 4;
+  string title = 5;
+  repeated string authors = 6;
+  repeated string labels = 7;
+  google.protobuf.Timestamp occurred_at = 8;
+  map<string, string> metadata = 9;
+  uint64 metadata_version = 10;
+}
+
 // LibraryImportCompletedEvent публикуется по завершении импорта CSV
 // (Goodreads/StoryGraph) библиотеки пользователя.
 message LibraryImportCompletedEvent {
