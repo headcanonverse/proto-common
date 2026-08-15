@@ -374,13 +374,23 @@ enum UserWorkStatus {
 // Книжные события переведены на work_id (2026-07-17, фаза 2 реворка,
 // единое ID-пространство — см. plan-book-discovery-implementation.md).
 // book_part_id в comment-событиях остаётся: глава — сущность контент-домена.
+//
+// Событие содержит полный catalog metadata snapshot. metadata_version > 0,
+// строго монотонна per work_id и общая с WorkPurgedEvent. Consumer атомарно
+// заменяет только всю metadata half при большей version, считает равную version
+// идемпотентной и игнорирует меньшую как stale. Producer не выпускает разные
+// snapshots с одинаковой version; consumer вправе отклонить такой конфликт.
+// Metadata update никогда не изменяет discovery half, принадлежащую
+// WorkDiscoveryUpdatedEvent.
 message WorkUpsertedEvent {
   string event_id = 1;
   string work_id = 2;
   WorkSource source = 3;
   string title = 4;
   repeated string authors = 5;
-  repeated string labels = 6;          // таксономия LabelType (самиздат) + subjects OL
+  // Display names only. Full typed label facts are carried by
+  // metadata["label_projection_v1"].
+  repeated string labels = 6;
   bool is_adult = 7;
   bool has_content = 8;                // есть главы в book-service
   bool published = 9;
@@ -392,17 +402,30 @@ message WorkUpsertedEvent {
   // хэшем последнего обогащения и сам решает, ставить ли work в очередь
   // пересчёта (рейтинговые мутации хэш не меняют → GPU не дёргается).
   string enrich_source_hash = 13;
+  uint64 metadata_version = 14;
+  string title_normalized = 15;
+  string author_normalized = 16;
+  // Full canonical ISBN-13 set across all editions, sorted and deduplicated.
+  repeated string isbn13s = 17;
+  string cover_url = 18;
+  string language = 19;
 }
 
 // WorkPurgedEvent публикуется catalog-service только после окончательного
 // удаления work по истечении 30-дневного окна восстановления. Soft-delete
 // продолжает использовать WorkUpsertedEvent{published=false}; это отдельное
 // событие запускает идемпотентную физическую зачистку контентного домена.
+// metadata_version > 0 и принадлежит той же строго монотонной per-work
+// sequence, что и WorkUpsertedEvent. Это ordered hard tombstone: большая
+// version удаляет metadata projection, равная идемпотентна, меньшая stale.
+// Consumer сохраняет tombstone ordering watermark даже после удаления
+// searchable document, чтобы старый WorkUpsertedEvent не мог воскресить work.
 message WorkPurgedEvent {
   string event_id = 1;
   string work_id = 2;
   google.protobuf.Timestamp occurred_at = 3;
   map<string, string> metadata = 4;
+  uint64 metadata_version = 5;
 }
 
 // LibraryImportCompletedEvent публикуется по завершении импорта CSV
@@ -487,12 +510,21 @@ enum WorkDiscoveryRankBucket {
 
 // WorkDiscoveryUpdatedEvent is emitted by recommendation-service through its
 // transactional outbox. For removed=false, consumers atomically replace the
-// complete tier + selection_status projection and related fields.
+// complete tier + selection_status projection and related fields. This replaces
+// only the discovery half and never changes catalog metadata fields.
 //
-// state_version is monotonically increasing per work_id. Consumers apply only
-// a version greater than the stored one, treat an equal version as idempotent,
-// and ignore lower stale versions. removed=true is an ordered tombstone: it
-// removes the discovery projection and the remaining state fields are ignored.
+// state_version is greater than zero and monotonically increasing per work_id.
+// Consumers apply only a version greater than the stored one, treat an equal
+// version as idempotent, and ignore lower stale versions. A producer never
+// emits different snapshots at an equal version; consumers may reject such a
+// conflict. removed=true is an ordered tombstone: it removes the discovery
+// projection and the remaining state fields are ignored.
+//
+// source_metadata_version is greater than zero and identifies the exact catalog
+// snapshot from which reco derived this state. Search exposes discovery
+// eligibility only while it equals the current WorkUpsertedEvent.metadata_version.
+// Either older or newer discovery metadata remains pending until the matching
+// projection half arrives.
 message WorkDiscoveryUpdatedEvent {
   string event_id = 1;
   string work_id = 2;
@@ -505,4 +537,5 @@ message WorkDiscoveryUpdatedEvent {
   uint64 state_version = 9;
   google.protobuf.Timestamp occurred_at = 10;
   bool removed = 11;
+  uint64 source_metadata_version = 12;
 }
