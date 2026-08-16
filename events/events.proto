@@ -409,6 +409,9 @@ message WorkUpsertedEvent {
   repeated string isbn13s = 17;
   string cover_url = 18;
   string language = 19;
+  // Catalog-owned bibliographic fact. Zero means unknown. Consumers must not
+  // substitute occurred_at or projection time when this value is absent.
+  int32 first_publish_year = 20;
 }
 
 // WorkPurgedEvent публикуется catalog-service только после окончательного
